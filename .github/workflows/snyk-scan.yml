@@ -11,7 +11,7 @@ jobs:
   snyk:
     name: Run Snyk SAST Scan
     runs-on: ubuntu-latest
-    continue-on-error: true
+    continue-on-error: false  # Set to false to fail on errors
 
     steps:
       - name: Checkout code
@@ -20,17 +20,20 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20' 
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
+
+      - name: Install Snyk CLI
+        run: npm install snyk@latest --save-dev  # Ensure latest Snyk CLI
 
       - name: Run Snyk to check for vulnerabilities
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           npx snyk auth $SNYK_TOKEN
-          npx snyk test --severity-threshold=high
+          SNYK_DEBUG=1 npx snyk test --severity-threshold=high  # Enable debug mode for detailed logs
 
       - name: Monitor and report to Snyk
         env:
